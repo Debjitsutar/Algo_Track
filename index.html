@@ -11,178 +11,179 @@
   <meta name="description" content="A fully featured admin theme which can be used to build CRM, CMS, etc.">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Settings -->
-  <script>
-    /*!
-     * Color mode toggler for Bootstrap's docs (https://getbootstrap.com/)
-     * Copyright 2011-2024 The Bootstrap Authors
-     * Licensed under the Creative Commons Attribution 3.0 Unported License.
-     * Modified by Simpleqode
-     */
+ <script>
+  (() => {
+    'use strict';
 
-    (() => {
-      'use strict';
+    const setStoredTheme = (theme) => localStorage.setItem('theme', theme);
+    const setStoredNavigationPosition = (navigationPosition) => localStorage.setItem('navigationPosition', navigationPosition);
 
-      const getStoredTheme = () => localStorage.getItem('theme');
-      const setStoredTheme = (theme) => localStorage.setItem('theme', theme);
+    // সবসময় ডার্ক থিম
+    const getPreferredTheme = () => 'dark';
 
-      const getStoredNavigationPosition = () => localStorage.getItem('navigationPosition');
-      const setStoredNavigationPosition = (navigationPosition) => localStorage.setItem('navigationPosition',
-        navigationPosition);
+    const getPreferredNavigationPosition = () => {
+      const storedNavigationPosition = localStorage.getItem('navigationPosition');
+      return storedNavigationPosition || 'sidenav';
+    };
 
-      const getPreferredTheme = () => {
-        const storedTheme = getStoredTheme();
-        if (storedTheme) {
-          return storedTheme;
-        }
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      };
+    const setTheme = () => {
+      document.documentElement.setAttribute('data-bs-theme', 'dark');
+    };
 
-      const getPreferredNavigationPosition = () => {
-        const storedNavigationPosition = getStoredNavigationPosition();
-        if (storedNavigationPosition) {
-          return storedNavigationPosition;
-        }
-        return 'sidenav';
-      };
+    const setNavigationPosition = (navigationPosition) => {
+      document.documentElement.setAttribute('data-bs-navigation-position', navigationPosition);
+    };
 
-      const setTheme = (theme) => {
-        if (theme === 'auto') {
-          document.documentElement.setAttribute('data-bs-theme', window.matchMedia(
-            '(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        } else {
-          document.documentElement.setAttribute('data-bs-theme', theme);
-        }
-      };
+    setTheme();
+    setNavigationPosition(getPreferredNavigationPosition());
 
-      const setNavigationPosition = (navigationPosition) => {
-        document.documentElement.setAttribute('data-bs-navigation-position', navigationPosition);
-      };
-
-      setTheme(getPreferredTheme());
-      setNavigationPosition(getPreferredNavigationPosition());
-
-      const showActiveTheme = (theme, settingsSwitcher) => {
-        document.querySelectorAll('[data-bs-theme-value]').forEach((element) => {
-          element.classList.remove('active');
-          element.setAttribute('aria-pressed', 'false');
-
-          if (element.getAttribute('data-bs-theme-value') === theme) {
-            element.classList.add('active');
-            element.setAttribute('aria-pressed', 'true');
-          }
-        });
-        if (settingsSwitcher) {
-          settingsSwitcher.focus();
-        }
-      };
-
-      const showActiveNavigationPosition = (navigationPosition, settingsSwitcher) => {
-        document.querySelectorAll('[data-bs-navigation-position-value]').forEach((element) => {
-          element.classList.remove('active');
-          element.setAttribute('aria-pressed', 'false');
-
-          if (element.getAttribute('data-bs-navigation-position-value') ===
-            navigationPosition) {
-            element.classList.add('active');
-            element.setAttribute('aria-pressed', 'true');
-          }
-        });
-
-        if (settingsSwitcher) {
-          settingsSwitcher.focus();
-        }
-      };
-
-      const refreshCharts = () => {
-        const charts = document.querySelectorAll('.chart-canvas');
-
-        charts.forEach((chart) => {
-          const chartId = chart.getAttribute('id');
-          const instance = Chart.getChart(chartId);
-
-          if (!instance) {
-            return;
-          }
-
-          if (instance.options.scales.y) {
-            instance.options.scales.y.grid.color = getComputedStyle(document
-              .documentElement).getPropertyValue('--bs-border-color');
-            instance.options.scales.y.ticks.color = getComputedStyle(document
-              .documentElement).getPropertyValue('--bs-secondary-color');
-          }
-
-          if (instance.options.scales.x) {
-            instance.options.scales.x.ticks.color = getComputedStyle(document
-              .documentElement).getPropertyValue('--bs-secondary-color');
-          }
-
-          if (instance.options.elements.arc) {
-            instance.options.elements.arc.borderColor = getComputedStyle(document
-              .documentElement).getPropertyValue('--bs-body-bg');
-            instance.options.elements.arc.hoverBorderColor = getComputedStyle(document
-              .documentElement).getPropertyValue('--bs-body-bg');
-          }
-
-          instance.update();
-        });
-      };
-
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-        const storedTheme = getStoredTheme();
-        if (storedTheme !== 'light' && storedTheme !== 'dark') {
-          setTheme(getPreferredTheme());
+    const showActiveTheme = (theme, settingsSwitcher) => {
+      document.querySelectorAll('[data-bs-theme-value]').forEach((element) => {
+        element.classList.remove('active');
+        element.setAttribute('aria-pressed', 'false');
+        if (element.getAttribute('data-bs-theme-value') === 'dark') {
+          element.classList.add('active');
+          element.setAttribute('aria-pressed', 'true');
         }
       });
+      if (settingsSwitcher) {
+        settingsSwitcher.focus();
+      }
+    };
 
-      window.addEventListener('DOMContentLoaded', () => {
-        showActiveTheme(getPreferredTheme());
-        showActiveNavigationPosition(getPreferredNavigationPosition());
+    const showActiveNavigationPosition = (navigationPosition, settingsSwitcher) => {
+      document.querySelectorAll('[data-bs-navigation-position-value]').forEach((element) => {
+        element.classList.remove('active');
+        element.setAttribute('aria-pressed', 'false');
+        if (element.getAttribute('data-bs-navigation-position-value') === navigationPosition) {
+          element.classList.add('active');
+          element.setAttribute('aria-pressed', 'true');
+        }
+      });
+      if (settingsSwitcher) {
+        settingsSwitcher.focus();
+      }
+    };
 
-        document.querySelectorAll('[data-bs-theme-value]').forEach((toggle) => {
-          toggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            const theme = toggle.getAttribute('data-bs-theme-value');
-            const settingsSwitcher = toggle.closest('.nav-item').querySelector(
-              '[data-bs-settings-switcher]');
-            console.log(settingsSwitcher);
-            setStoredTheme(theme);
-            setTheme(theme);
-            showActiveTheme(theme, settingsSwitcher);
-            refreshCharts();
-          });
-        });
+    window.addEventListener('DOMContentLoaded', () => {
+      showActiveTheme(getPreferredTheme());
+      showActiveNavigationPosition(getPreferredNavigationPosition());
 
-        document.querySelectorAll('[data-bs-navigation-position-value]').forEach((toggle) => {
-          toggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            const navigationPosition = toggle.getAttribute(
-              'data-bs-navigation-position-value');
-            const settingsSwitcher = toggle.closest('.nav-item').querySelector(
-              '[data-bs-settings-switcher]');
-            setStoredNavigationPosition(navigationPosition);
-            setNavigationPosition(navigationPosition);
-            showActiveNavigationPosition(navigationPosition, settingsSwitcher);
-          });
+      // Theme toggle সবসময় ডার্কে লক
+      document.querySelectorAll('[data-bs-theme-value]').forEach((toggle) => {
+        toggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          setStoredTheme('dark');
+          setTheme();
+          showActiveTheme('dark', toggle.closest('.nav-item').querySelector('[data-bs-settings-switcher]'));
         });
       });
-    })();
 
-    function updateDateTime() {
-      let now = new Date();
-      let options = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      };
+      document.querySelectorAll('[data-bs-navigation-position-value]').forEach((toggle) => {
+        toggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          const navigationPosition = toggle.getAttribute('data-bs-navigation-position-value');
+          setStoredNavigationPosition(navigationPosition);
+          setNavigationPosition(navigationPosition);
+          showActiveNavigationPosition(navigationPosition, toggle.closest('.nav-item').querySelector('[data-bs-settings-switcher]'));
+        });
+      });
+    });
+  })();
 
-      document.getElementById("datetime").innerHTML = now.toLocaleString(undefined, options);
+  document.addEventListener("DOMContentLoaded", function () {
+    const statusDropdowns = document.querySelectorAll('.status-select');
+    const checkboxes = document.querySelectorAll('.review-checkbox');
+    const completedCountElement = document.getElementById('completedCount');
+    const totalPrograms = statusDropdowns.length;
+    const searchInput = document.getElementById('questionSearch');
+    const tableRows = document.querySelectorAll('.table tbody tr');
+
+    function updateCompletedCount() {
+      const completedCount = Array.from(statusDropdowns).filter(select => select.value === 'Completed').length;
+      completedCountElement.textContent = ${completedCount} out of ${totalPrograms} programs completed;
     }
 
-    setInterval(updateDateTime, 100); // Update every minute
-    updateDateTime(); // Initial call
-  </script>
+    function applyColorClass(select) {
+      select.classList.remove('text-danger', 'text-warning', 'text-success', 'text-primary');
+
+      switch (select.value) {
+        case 'Untouched':
+          select.classList.add('text-danger');
+          break;
+        case 'In Progress':
+          select.classList.add('text-warning');
+          break;
+        case 'Completed':
+          select.classList.add('text-success');
+          break;
+        case 'Review':
+          select.classList.add('text-primary');
+          break;
+      }
+    }
+
+    function handleStatusChange(select, index) {
+      const value = select.value;
+      const checkbox = checkboxes[index];
+
+      if (value === 'Completed' || value === 'Review') {
+        checkbox.checked = true;
+      } else {
+        checkbox.checked = false;
+      }
+
+      updateCompletedCount();
+      applyColorClass(select);
+
+      if (value === 'Review') {
+        const reviewLink = select.getAttribute('data-review-link');
+        if (reviewLink) {
+          window.open(reviewLink, '_blank');
+        }
+      }
+    }
+
+    statusDropdowns.forEach((select, index) => {
+      applyColorClass(select);
+      if (select.value === 'Completed' || select.value === 'Review') {
+        checkboxes[index].checked = true;
+      }
+      select.addEventListener('change', () => handleStatusChange(select, index));
+    });
+
+    updateCompletedCount();
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase();
+
+        tableRows.forEach(row => {
+          const questionCell = row.cells[1];
+          const titleDiv = questionCell.querySelector('div.ms-4 > div');
+          const questionText = titleDiv ? titleDiv.textContent.toLowerCase() : "";
+
+          const statusSelect = row.querySelector('.status-select');
+          const statusText = statusSelect ? statusSelect.value.toLowerCase() : "";
+
+          const companyCell = row.cells[row.cells.length - 1];
+          const companyImgs = companyCell ? companyCell.querySelectorAll('img') : [];
+          let companyMatch = false;
+
+          companyImgs.forEach(img => {
+            const src = img.getAttribute('src').toLowerCase();
+            if (src.includes(searchTerm)) {
+              companyMatch = true;
+            }
+          });
+
+          const matches = questionText.includes(searchTerm) || statusText.includes(searchTerm) || companyMatch;
+          row.style.display = matches ? '' : 'none';
+        });
+      });
+    }
+  });
+</script>
 
   <!-- Favicon -->
   <link rel="shortcut icon" href="./assets/favicon/favicon.ico" type="image/x-icon">
