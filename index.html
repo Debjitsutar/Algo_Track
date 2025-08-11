@@ -12,107 +12,104 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Settings -->
  <script>
-    /*!
-     * Color mode toggler for Bootstrap's docs (https://getbootstrap.com/)
-     * Copyright 2011-2024 The Bootstrap Authors
-     * Licensed under the Creative Commons Attribution 3.0 Unported License.
-     * Modified by Simpleqode
-     */
 (() => {
   'use strict';
 
-  const setStoredTheme = (theme) => localStorage.setItem('theme', theme);
-  const setStoredNavigationPosition = (navigationPosition) => localStorage.setItem('navigationPosition', navigationPosition);
+  // Always set theme to dark
+  const setTheme = () => {
+    document.documentElement.setAttribute('data-bs-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+  };
 
-  // সবসময় ডার্ক থিম
-  const getPreferredTheme = () => 'dark';
+  // Always set navigation position from stored or default
+  const getStoredNavigationPosition = () => localStorage.getItem('navigationPosition');
+  const setStoredNavigationPosition = (pos) => localStorage.setItem('navigationPosition', pos);
 
   const getPreferredNavigationPosition = () => {
-    const storedNavigationPosition = localStorage.getItem('navigationPosition');
-    return storedNavigationPosition || 'sidenav';
+    const storedNavigationPosition = getStoredNavigationPosition();
+    return storedNavigationPosition ? storedNavigationPosition : 'sidenav';
   };
 
-  const setTheme = (theme) => {
-    document.documentElement.setAttribute('data-bs-theme', 'dark');
+  const setNavigationPosition = (pos) => {
+    document.documentElement.setAttribute('data-bs-navigation-position', pos);
   };
 
-  const setNavigationPosition = (navigationPosition) => {
-    document.documentElement.setAttribute('data-bs-navigation-position', navigationPosition);
-  };
-
-  setTheme(getPreferredTheme());
-  setNavigationPosition(getPreferredNavigationPosition());
-
-  const showActiveTheme = (theme, settingsSwitcher) => {
-    document.querySelectorAll('[data-bs-theme-value]').forEach((element) => {
-      element.classList.remove('active');
-      element.setAttribute('aria-pressed', 'false');
-      if (element.getAttribute('data-bs-theme-value') === 'dark') {
-        element.classList.add('active');
-        element.setAttribute('aria-pressed', 'true');
-      }
-    });
-    if (settingsSwitcher) {
-      settingsSwitcher.focus();
-    }
-  };
-
-  const showActiveNavigationPosition = (navigationPosition, settingsSwitcher) => {
+  const showActiveNavigationPosition = (pos, settingsSwitcher) => {
     document.querySelectorAll('[data-bs-navigation-position-value]').forEach((element) => {
       element.classList.remove('active');
       element.setAttribute('aria-pressed', 'false');
-      if (element.getAttribute('data-bs-navigation-position-value') === navigationPosition) {
+      if (element.getAttribute('data-bs-navigation-position-value') === pos) {
         element.classList.add('active');
         element.setAttribute('aria-pressed', 'true');
       }
     });
-    if (settingsSwitcher) {
-      settingsSwitcher.focus();
-    }
+    if (settingsSwitcher) settingsSwitcher.focus();
   };
 
-  window.addEventListener('DOMContentLoaded', () => {
-    showActiveTheme(getPreferredTheme());
-    showActiveNavigationPosition(getPreferredNavigationPosition());
+  const refreshCharts = () => {
+    const charts = document.querySelectorAll('.chart-canvas');
+    charts.forEach((chart) => {
+      const chartId = chart.getAttribute('id');
+      const instance = Chart.getChart(chartId);
+      if (!instance) return;
 
-    // Theme toggle গুলো ডার্কে লক করে দিচ্ছি
-    document.querySelectorAll('[data-bs-theme-value]').forEach((toggle) => {
-      toggle.addEventListener('click', (e) => {
-        e.preventDefault();
-        setStoredTheme('dark');
-        setTheme('dark');
-        showActiveTheme('dark', toggle.closest('.nav-item').querySelector('[data-bs-settings-switcher]'));
-      });
+      if (instance.options.scales.y) {
+        instance.options.scales.y.grid.color = getComputedStyle(document.documentElement)
+          .getPropertyValue('--bs-border-color');
+        instance.options.scales.y.ticks.color = getComputedStyle(document.documentElement)
+          .getPropertyValue('--bs-secondary-color');
+      }
+      if (instance.options.scales.x) {
+        instance.options.scales.x.ticks.color = getComputedStyle(document.documentElement)
+          .getPropertyValue('--bs-secondary-color');
+      }
+      if (instance.options.elements.arc) {
+        instance.options.elements.arc.borderColor = getComputedStyle(document.documentElement)
+          .getPropertyValue('--bs-body-bg');
+        instance.options.elements.arc.hoverBorderColor = getComputedStyle(document.documentElement)
+          .getPropertyValue('--bs-body-bg');
+      }
+      instance.update();
     });
+  };
+
+  // Apply forced dark mode and navigation position
+  setTheme();
+  setNavigationPosition(getPreferredNavigationPosition());
+
+  window.addEventListener('DOMContentLoaded', () => {
+    showActiveNavigationPosition(getPreferredNavigationPosition());
 
     document.querySelectorAll('[data-bs-navigation-position-value]').forEach((toggle) => {
       toggle.addEventListener('click', (e) => {
         e.preventDefault();
         const navigationPosition = toggle.getAttribute('data-bs-navigation-position-value');
+        const settingsSwitcher = toggle.closest('.nav-item').querySelector('[data-bs-settings-switcher]');
         setStoredNavigationPosition(navigationPosition);
         setNavigationPosition(navigationPosition);
-        showActiveNavigationPosition(navigationPosition, toggle.closest('.nav-item').querySelector('[data-bs-settings-switcher]'));
+        showActiveNavigationPosition(navigationPosition, settingsSwitcher);
       });
     });
+
+    refreshCharts();
   });
 })();
 
-    function updateDateTime() {
-      let now = new Date();
-      let options = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      };
-
-      document.getElementById("datetime").innerHTML = now.toLocaleString(undefined, options);
-    }
-
-    setInterval(updateDateTime, 100); // Update every minute
-    updateDateTime(); // Initial call
-  </script>
+// Date & Time updater
+function updateDateTime() {
+  let now = new Date();
+  let options = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  document.getElementById("datetime").innerHTML = now.toLocaleString(undefined, options);
+}
+setInterval(updateDateTime, 60000); // update every minute
+updateDateTime();
+</script>
 
   <!-- Favicon -->
   <link rel="shortcut icon" href="./assets/favicon/favicon.ico" type="image/x-icon">
